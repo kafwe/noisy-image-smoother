@@ -1,3 +1,9 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * A sequential mean filter implementation.
  * 
@@ -46,18 +52,56 @@ public class MeanFilterSerial {
         this.windowWidth = windowWidth;
     }
 
-    public static void main(String[] args) {
-        //String input = args[0];
-        //String output = args[1];
-        int windowWidth = Integer.parseInt(args[2]);
+    /**
+     * @param values
+     * @return
+     */
+    public int computeMean(int[] values) {
+        int sum = 0;
 
+        for (int value : values) {
+            sum += value;
+        }
+
+        return sum/values.length;
+    }
+
+    public BufferedImage apply(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage filteredImage = new BufferedImage(width, height, image.getType());
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int[] values = new int[windowWidth * windowWidth];
+
+   
+                int mean = computeMean(values);
+                filteredImage.setRGB(x, y, mean);
+            }
+        }
+
+        return filteredImage;
+    }
+
+    public static void main(String[] args) {
         try {
+            File inputFile = new File(args[0]);
+            File outputFile = new File(args[1]);
+            int windowWidth = Integer.parseInt(args[2]);
+
             MeanFilterSerial meanFilter = new MeanFilterSerial(windowWidth);
-            //meanFilter.apply(input);
+            BufferedImage inputImage = ImageIO.read(inputFile);
+            BufferedImage filteredImage = meanFilter.apply(inputImage);
+            ImageIO.write(filteredImage, "jpg", outputFile);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+        } catch (IOException e) {
+            System.out.println("File could not be opened.");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
-        }
-        
+        }        
     }
     
 }
