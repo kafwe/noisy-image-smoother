@@ -3,60 +3,34 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.awt.Color;
 
 /**
- * A sequential mean filter implementation.
+ * A sequential mean filter implementation to smooth 2D RGB images.
  * 
  * @author Jordy Kafwe
  */
-public class MeanFilterSerial {
-
-    private int windowWidth;
+public class MeanFilterSerial extends Filter {
 
     /**
      * Constructs a new MeanFilterSerial object with the specified window width.
      * 
-     * @param windowWidth the width of the window to use for the mean filter
-     * @throws IllegalArgumentException if windowWidth is not odd
-     * @throws IllegalArgumentException if windowWidth is less than 3
+     * @param windowWidth the width of the window to use for the filter
+     * @throws IllegalArgumentException if windowWidth is not odd or if 
+     * windowWidth is less than 3
+     * @see Filter#Filter(int)
      */
     public MeanFilterSerial(int windowWidth) {
-        setWindowWidth(windowWidth);
+        super(windowWidth);
     }
 
     /**
-     * Returns the window width of the mean filter.
+     * Computes the mean of the neighbouring pixels in the specified window.
      * 
-     * @return the int representing the window width
+     * @param values the values of the neighbouring pixels
+     * @return the int representing the mean of the neighbouring pixels
      */
-    public int getWindowWidth() {
-        return windowWidth;
-    }
-
-    /**
-     * Sets the window width of the mean filter.
-     * 
-     * @param windowWidth the width of the window to use for the mean filter
-     * @throws IllegalArgumentException if windowWidth is not odd
-     * @throws IllegalArgumentException if windowWidth is less than 3
-     */
-    public void setWindowWidth(int windowWidth) {
-        if (windowWidth % 2 == 0) {
-            throw new IllegalArgumentException("Window width must be odd");
-        }
-
-        if (windowWidth < 3) {
-            throw new IllegalArgumentException("Window width must be at least 3");
-        }
-
-        this.windowWidth = windowWidth;
-    }
-
-    /**
-     * @param values
-     * @return
-     */
-    public int computeMean(int[] values) {
+    private int computeMean(int[] values) {
         int sum = 0;
 
         for (int value : values) {
@@ -66,21 +40,51 @@ public class MeanFilterSerial {
         return sum/values.length;
     }
 
+    /**
+     * Applies the mean filter to the specified image.
+     * 
+     * @param image the image to apply the filter to
+     * @return the filtered image
+     * @see Filter#apply(BufferedImage)
+     */
+    @Override
     public BufferedImage apply(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         BufferedImage filteredImage = new BufferedImage(width, height, image.getType());
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int[] values = new int[windowWidth * windowWidth];
+        // iterate through each pixel in the image
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int[] redValues = new int[getWindowWidth() * getWindowWidth()];
+                int[] greenValues = new int[getWindowWidth() * getWindowWidth()];
+                int[] blueValues = new int[getWindowWidth() * getWindowWidth()];
+                
+                int index = 0;
 
-   
-                int mean = computeMean(values);
-                filteredImage.setRGB(x, y, mean);
+                // iterate through each pixel in the window
+                for (int i = x - (getWindowWidth() / 2); i <= x + (getWindowWidth() / 2); i++) {
+                    for (int j = y - (getWindowWidth() / 2); j <= y + (getWindowWidth() / 2); j++) {
+                        boolean inBounds = i >= 0 && i < width && j >= 0 && j < height;
+                        if (inBounds) {
+                            int rgb = image.getRGB(i, j);
+                            Color pixel = new Color(rgb);
+                            redValues[index] = pixel.getRed();
+                            greenValues[index] = pixel.getGreen();
+                            blueValues[index] = pixel.getBlue();
+                            index++;
+                        }
+                    }
+                }
+
+                int red = computeMean(redValues);
+                int green = computeMean(greenValues);
+                int blue = computeMean(blueValues);
+                int filteredPixel = new Color(red, green, blue).getRGB();
+                
+                filteredImage.setRGB(x, y, filteredPixel);
             }
         }
-
         return filteredImage;
     }
 
@@ -93,12 +97,12 @@ public class MeanFilterSerial {
             MeanFilterSerial meanFilter = new MeanFilterSerial(windowWidth);
             BufferedImage inputImage = ImageIO.read(inputFile);
             BufferedImage filteredImage = meanFilter.apply(inputImage);
-            ImageIO.write(filteredImage, "jpg", outputFile);
+            ImageIO.write(filteredImage, "jpeg", outputFile);
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
         } catch (IOException e) {
-            System.out.println("File could not be opened.");
+            System.out.println("File could not be opened");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }        
