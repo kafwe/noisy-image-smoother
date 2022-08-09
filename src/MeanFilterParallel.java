@@ -61,6 +61,16 @@ public class MeanFilterParallel extends RecursiveAction {
 
     @Override
     protected void compute() {
+        if (length < 1000) {
+            computeDirectly();
+            return;
+        }
+
+        int split = length / 2;
+
+        invokeAll(new MeanFilterParallel(source, start, split, destination, windowWidth), 
+        new MeanFilterParallel(source, start + split, length - split, destination, 
+        windowWidth));
         
     }
 
