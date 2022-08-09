@@ -3,7 +3,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.awt.Color;
 
 /**
  * A sequential mean filter implementation to smooth 2D RGB images.
@@ -11,6 +10,7 @@ import java.awt.Color;
  * @author Jordy Kafwe
  */
 public class MeanFilterSerial {
+
     private int windowWidth;
 
     /**
@@ -56,21 +56,21 @@ public class MeanFilterSerial {
      * @return the filtered image
      */
     public BufferedImage apply(BufferedImage image) {
-        int windowSize = windowWidth * windowWidth;
         int width = image.getWidth();
         int height = image.getHeight();
+        int neighbouringPixels = (windowWidth - 1) / 2;
         BufferedImage filteredImage = new BufferedImage(width, height, image.getType());
 
         // iterate through each pixel in the image
-        for (int x = windowWidth/2 ; x < width - windowWidth/2; x++) {
-            for (int y = windowWidth/2; y < height - windowWidth/2; y++) {
+        for (int x = neighbouringPixels ; x < width - neighbouringPixels; x++) {
+            for (int y = neighbouringPixels; y < height - neighbouringPixels; y++) {
                 int redValues = 0;
                 int greenValues = 0;
                 int blueValues = 0;
 
                 // iterate through each pixel in the window
-                for (int i = x - (getWindowWidth() / 2); i <= x + (getWindowWidth() / 2); i++) {
-                    for (int j = y - (getWindowWidth() / 2); j <= y + (getWindowWidth() / 2); j++) {
+                for (int i = x - neighbouringPixels; i <= x + neighbouringPixels; i++) {
+                    for (int j = y - neighbouringPixels; j <= y + neighbouringPixels; j++) {
                         int pixel = image.getRGB(i, j);
                         redValues += pixel >> 16 & 0xFF;
                         greenValues += pixel >> 8 & 0xFF;
@@ -78,11 +78,13 @@ public class MeanFilterSerial {
                     }
                 }
 
+                // compute the mean of the neighbouring pixels
+                int windowSize = windowWidth * windowWidth;
                 int red = redValues/windowSize;
                 int green = greenValues/windowSize;
                 int blue = blueValues/windowSize;
-                int filteredPixel = new Color(red, green, blue).getRGB();
-                
+
+                int filteredPixel = red << 16 | green << 8 | blue;
                 filteredImage.setRGB(x, y, filteredPixel);
             }
         }
