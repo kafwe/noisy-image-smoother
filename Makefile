@@ -1,23 +1,32 @@
-JAVAC=/usr/bin/javac
 .SUFFIXES: .java .class
 SRCDIR=src
 BINDIR=bin
+JAVA=/usr/bin/java
+JAVAC=/usr/bin/javac
 
-$(BINDIR)/%.class:$(SRCDIR)/%.java
+$(BINDIR)/%.class: $(SRCDIR)/%.java
 	$(JAVAC) -d $(BINDIR)/ -cp $(BINDIR) $<
+	
+CLASSES2=MedianFilterSerial.class \
+	 MeanFilterSerial.class \
+	 MedianFilterParallel.class \
+	 MeanFilterParallel.class
+         
+CLASSES=$(CLASSES2:%.class=$(BINDIR)/%.class)
+	
+default: $(CLASSES)
 
-CLASSES=Filter.class MeanFilterSerial.class MeanFilterParallel.class\
-MedianFilterSerial.class MedianFilterParallel.class
-		
-CLASS_FILES=$(CLASSES:%.class=$(BINDIR)/%.class)
+runmedser: $(CLASSES)
+	$(JAVA) -cp $(BINDIR) MedianFilterSerial $(INPUT) $(OUTPUT) $(WINDOW)
+	
+runmenser: $(CLASSES)
+	$(JAVA) -cp $(BINDIR) MeanFilterSerial $(INPUT) $(OUTPUT) $(WINDOW)
 
-default: $(CLASS_FILES)
+runmedpar: $(CLASSES)
+	$(JAVA) -cp $(BINDIR) MeanFilterParallel $(INPUT) $(OUTPUT) $(WINDOW)
 
+runmenpar: $(CLASSES)
+	$(JAVA) -cp $(BINDIR) MeanFilterParallel $(INPUT) $(OUTPUT) $(WINDOW)
+	
 clean:
 	rm $(BINDIR)/*.class
-	
-run:
-	@java -cp bin MeanFilterSerial $(INPUT) $(OUTPUT) $(WINDOW)
-	 
-docs:
-	javadoc -d doc src/*.java

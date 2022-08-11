@@ -1,85 +1,125 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import javax.imageio.ImageIO;
 
 public class MeanFilterParallel extends RecursiveAction {
 
-    private int[] source;
+    private BufferedImage source;
     private int start;
     private int length;
-    private int[] destination;
+    private  BufferedImage destination;
     private int windowWidth;
+    private static final int SEQUENTIAL_CUTOFF = 100;
     
-    public MeanFilterParallel(int[] source, int start, int length, int[] destination, int windowWidth) {
+    public MeanFilterParallel(BufferedImage source, int start, int length, BufferedImage destination, int windowWidth) {
         this.source = source;
         this.start = start;
         this.length = length;
         this.destination = destination;
         this.windowWidth = windowWidth;
     }
-    
-    public void setWindowWidth(int windowWidth) {
-        if (windowWidth % 2 == 0 || windowWidth < 3) {
+
+    public static boolean isValidWindowWidth(int width) {       
+        if (width % 2 == 0 || width < 3) {
             throw new IllegalArgumentException(
                 "Window width must be odd and greater than 2");
         }
 
-        this.windowWidth = windowWidth;
-    }
+        return true;
 
-    public int getWindowWidth() {
-        return windowWidth;
     }
 
     protected void computeDirectly() {
+        int width = source.getWidth();
+        int height = source.getHeight();
         int neighbouringPixels = (windowWidth - 1) / 2;
-        for (int i = start; i < start + length; i++) {
-            // Calculate average.
-            int redValues = 0;
-            int greenValues = 0; 
-            int blueValues = 0;
 
-            for (int j = -neighbouringPixels; j <= neighbouringPixels; j++) {
-                int index = Math.min(Math.max(j + i, 0), source.length - 1);
-                int pixel = source[index];
-                redValues += pixel >> 16 & 0xFF;
-                greenValues += pixel >> 8 & 0xFF;
-                blueValues += pixel & 0xFF;
+        // keep in bounds of image
+        start = Math.max(start, neighbouringPixels);
+        length = Math.min(length, width - neighbouringPixels - start);
+
+        // iterate through each pixel in the image
+        for (int x = start; x < start + length; x++) {
+            for (int y = neighbouringPixels; y < height - neighbouringPixels; y++) {
+                int red = 0;
+                int green = 0;
+                int blue = 0;
+
+                // iterate through each pixel in the window
+                for (int i = x - neighbouringPixels; i <= x + neighbouringPixels; i++) {
+                    for (int j = y - neighbouringPixels; j <= y + neighbouringPixels; j++) {
+                        int pixel = source.getRGB(i, j);
+                        red += pixel >> 16 & 0xFF;
+                        green += pixel >> 8 & 0xFF;
+                        blue += pixel & 0xFF;
+                    }
+                }
+
+                // compute the mean of the neighbouring pixels
+                int windowSize = windowWidth * windowWidth;
+                red /= windowSize;
+                green /= windowSize;
+                blue /= windowSize;
+
+                int filteredPixel = red << 16 | green << 8 | blue;
+                destination.setRGB(x, y, filteredPixel);
             }
-
-            
-            int red = redValues / (windowWidth * windowWidth);
-            int green = greenValues / (windowWidth * windowWidth);
-            int blue = blueValues / (windowWidth * windowWidth);
-            // Re-assemble destination pixel.
-            int dpixel = red << 16 | green << 8 | blue;
-            destination[i] = dpixel;
         }
     }  
 
     @Override
     protected void compute() {
-        if (length < 1000) {
+        if (length <= SEQUENTIAL_CUTOFF) {
             computeDirectly();
             return;
         }
 
-        int split = length / 2;
-
-        invokeAll(new MeanFilterParallel(source, start, split, destination, windowWidth), 
-        new MeanFilterParallel(source, start + split, length - split, destination, 
-        windowWidth));
-        
+        int mid = length / 2;
+        MeanFilterParallel left = new MeanFilterParallel(source, start, mid, destination, windowWidth);
+        MeanFilterParallel right = new MeanFilterParallel(source, start + mid, length - mid, destination, windowWidth);
+        left.fork();
+        right.compute();
+        left.join();
     }
 
     public static void main(String[] args) {
-        
+        try {
+            File inputFile = new File(args[0]);
+            File outputFile = new File(args[1]);
+            int windowWidth = Integer.parseInt(args[2]);
+            isValidWindowWidth(windowWidth);
+            BufferedImage inputImage = ImageIO.read(inputFile);
+            BufferedImage filteredImage = smooth(inputImage, windowWidth);
+            ImageIO.write(filteredImage, "jpeg", outputFile);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+        } catch (IOException e) {
+            System.out.println("File could not be opened");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }        
     }
 
-    public static BufferedImage smooth(BufferedImage image) {
+    public static BufferedImage smooth(BufferedImage image, int windowWidth) {
+        int width = image.getWidth();
+        BufferedImage filteredImage = new BufferedImage(width, image.getHeight(), image.getType());
 
+        MeanFilterParallel task = new MeanFilterParallel(image, 0, width, filteredImage, windowWidth);
+        ForkJoinPool pool = new ForkJoinPool();
+
+        long startTime = System.currentTimeMillis();
+        pool.invoke(task);
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("Parallel Mean Filter took " + (endTime - startTime) + 
+                " milliseconds.");
+
+        return filteredImage;
     }
     
 }

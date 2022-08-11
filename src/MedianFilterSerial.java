@@ -97,6 +97,7 @@ public class MedianFilterSerial {
                 int red = computeMedian(redValues);
                 int green = computeMedian(greenValues);
                 int blue = computeMedian(blueValues);
+                // replace the pixel with the median of the neighbouring pixels
                 int filteredPixel = red << 16 | green << 8 | blue;
                 filteredImage.setRGB(x, y, filteredPixel);
             }
