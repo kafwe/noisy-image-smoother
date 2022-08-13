@@ -60,29 +60,30 @@ public class MeanFilterSerial {
         int height = image.getHeight();
         int neighbouringPixels = (windowWidth - 1) / 2;
         BufferedImage filteredImage = new BufferedImage(width, height, image.getType());
+        
 
         // iterate through each pixel in the image
         for (int x = neighbouringPixels ; x < width - neighbouringPixels; x++) {
             for (int y = neighbouringPixels; y < height - neighbouringPixels; y++) {
-                int redValues = 0;
-                int greenValues = 0;
-                int blueValues = 0;
+                int red = 0;
+                int green = 0;
+                int blue = 0;
 
                 // iterate through each pixel in the window
                 for (int i = x - neighbouringPixels; i <= x + neighbouringPixels; i++) {
                     for (int j = y - neighbouringPixels; j <= y + neighbouringPixels; j++) {
                         int pixel = image.getRGB(i, j);
-                        redValues += pixel >> 16 & 0xFF;
-                        greenValues += pixel >> 8 & 0xFF;
-                        blueValues += pixel & 0xFF;
+                        red += pixel >> 16 & 0xFF;
+                        green += pixel >> 8 & 0xFF;
+                        blue += pixel & 0xFF;
                     }
                 }
 
                 // compute the mean of the neighbouring pixels
                 int windowSize = windowWidth * windowWidth;
-                int red = redValues/windowSize;
-                int green = greenValues/windowSize;
-                int blue = blueValues/windowSize;
+                red /= windowSize;
+                green /= windowSize;
+                blue /= windowSize;
 
                 int filteredPixel = red << 16 | green << 8 | blue;
                 filteredImage.setRGB(x, y, filteredPixel);
@@ -101,6 +102,7 @@ public class MeanFilterSerial {
             BufferedImage inputImage = ImageIO.read(inputFile);
             BufferedImage filteredImage = meanFilter.apply(inputImage);
             ImageIO.write(filteredImage, "jpeg", outputFile);
+
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
