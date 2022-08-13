@@ -45,7 +45,7 @@ public class MeanFilterParallel extends RecursiveAction {
      * @throws IllegalArgumentException if the window width is not odd or 
      * if it is less than 3
      */
-    public static boolean isValidWindowWidth(int width) {       
+    private static boolean isValidWindowWidth(int width) {       
         if (width % 2 == 0 || width < 3) {
             throw new IllegalArgumentException(
                 "Window width must be odd and greater than 2");
@@ -90,7 +90,7 @@ public class MeanFilterParallel extends RecursiveAction {
                 red /= windowSize;
                 green /= windowSize;
                 blue /= windowSize;
-                
+
                 int filteredPixel = red << 16 | green << 8 | blue;
                 destination.setRGB(x, y, filteredPixel);
             }
