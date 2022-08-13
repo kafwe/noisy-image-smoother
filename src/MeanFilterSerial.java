@@ -105,13 +105,14 @@ public class MeanFilterSerial {
 
 
         } catch (FileNotFoundException e) {
-            System.out.println("File not found");
+            System.out.println("File not found or could not be read");
         } catch (IOException e) {
-            System.out.println("File could not be opened");
+            System.out.println("File could not be written");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Usage: java MeanFilterSerial <inputImageName> <outputImageName> <windowWidth>");
+            System.out.println("Missing Arguments\n" + 
+            "Usage: java MeanFilterSerial <inputImageName> <outputImageName> <windowWidth>");
         }       
     }
     

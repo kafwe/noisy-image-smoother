@@ -19,7 +19,7 @@ public class MedianFilterParallel extends RecursiveAction {
     private int length;
     private  BufferedImage destination;
     private int windowWidth;
-    private static final int SEQUENTIAL_CUTOFF = 100; // cutoff for sequential processing
+    private static int SEQUENTIAL_CUTOFF = 100; // cutoff for sequential processing
     
     /**
      * Constructs a new MedianFilterParallel object with the specified window width.
@@ -147,13 +147,14 @@ public class MedianFilterParallel extends RecursiveAction {
             ImageIO.write(filteredImage, "jpeg", outputFile);
 
         } catch (FileNotFoundException e) {
-            System.out.println("File not found");
+            System.out.println("File not found or could not be read");
         } catch (IOException e) {
-            System.out.println("File could not be opened");
+            System.out.println("File could not be written");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Usage: java MedianFilterParallel <inputImageName> <outputImageName> <windowWidth>");
+            System.out.println("Missing arguments\n" +
+                "Usage: java MedianFilterParallel <input file> <output file> <window width>");
         }
     }
 

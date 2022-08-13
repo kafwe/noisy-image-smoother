@@ -18,7 +18,7 @@ public class MeanFilterParallel extends RecursiveAction {
     private int length;
     private  BufferedImage destination;
     private int windowWidth;
-    private static final int SEQUENTIAL_CUTOFF = 100; // cutoff for sequential processing
+    private static int SEQUENTIAL_CUTOFF = 100; // cutoff for sequential processing
     
     /**
      * Constructs a new MeanFilterParallel object with the specified window width.
@@ -124,6 +124,11 @@ public class MeanFilterParallel extends RecursiveAction {
     }
 
     public static void main(String[] args) {
+        boolean testingSequentialCutoff = args.length == 4;
+        if (testingSequentialCutoff) {
+            SEQUENTIAL_CUTOFF = Integer.parseInt(args[3]);
+        }    
+
         try {
             File inputFile = new File(args[0]);
             File outputFile = new File(args[1]);
@@ -134,13 +139,14 @@ public class MeanFilterParallel extends RecursiveAction {
             ImageIO.write(filteredImage, "jpeg", outputFile);
 
         } catch (FileNotFoundException e) {
-            System.out.println("File not found");
+            System.out.println("File not found or could not be read");
         } catch (IOException e) {
-            System.out.println("File could not be opened");
+            System.out.println("File could not be written");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Usage: java MeanFilterParallel <inputImageName> <outputImageName> <windowWidth>");
+            System.out.println("Missing arguments\n" + 
+            "Usage: java MeanFilterParallel <inputImageName> <outputImageName> <windowWidth>");
         }        
     }
 
