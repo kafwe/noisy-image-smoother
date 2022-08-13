@@ -124,7 +124,8 @@ public class MeanFilterParallel extends RecursiveAction {
     }
 
     public static void main(String[] args) {
-        boolean testingSequentialCutoff = args.length == 4;
+        boolean testingSequentialCutoff = (args.length == 4);
+
         if (testingSequentialCutoff) {
             SEQUENTIAL_CUTOFF = Integer.parseInt(args[3]);
         }    
