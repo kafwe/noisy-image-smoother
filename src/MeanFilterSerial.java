@@ -100,9 +100,14 @@ public class MeanFilterSerial {
 
             MeanFilterSerial meanFilter = new MeanFilterSerial(windowWidth);
             BufferedImage inputImage = ImageIO.read(inputFile);
-            BufferedImage filteredImage = meanFilter.apply(inputImage);
-            ImageIO.write(filteredImage, "jpeg", outputFile);
 
+            // time the execution of the filter
+            long startTime = System.currentTimeMillis();
+            BufferedImage filteredImage = meanFilter.apply(inputImage);
+            long endTime = System.currentTimeMillis();
+
+            ImageIO.write(filteredImage, "jpeg", outputFile);
+            System.out.println(endTime - startTime);
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found or could not be read");

@@ -113,8 +113,14 @@ public class MedianFilterSerial {
 
             MedianFilterSerial medianFilter = new MedianFilterSerial(windowWidth);
             BufferedImage inputImage = ImageIO.read(inputFile);
+
+            // time the execution of the filter
+            long startTime = System.currentTimeMillis();
             BufferedImage filteredImage = medianFilter.apply(inputImage);
+            long endTime = System.currentTimeMillis();
+            
             ImageIO.write(filteredImage, "jpeg", outputFile);
+            System.out.println(endTime - startTime);
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found or could not be read");
