@@ -52,7 +52,6 @@ public class MeanFilterParallel extends RecursiveAction {
         }
 
         return true;
-
     }
 
     /**
@@ -140,6 +139,8 @@ public class MeanFilterParallel extends RecursiveAction {
             System.out.println("File could not be opened");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Usage: java MeanFilterParallel <inputImageName> <outputImageName> <windowWidth>");
         }        
     }
 
@@ -162,8 +163,7 @@ public class MeanFilterParallel extends RecursiveAction {
         pool.invoke(task);
         long endTime = System.currentTimeMillis();
 
-        System.out.println("Parallel Mean Filter took " + (endTime - startTime) + 
-                " milliseconds.");
+        System.out.println(endTime - startTime);
 
         return filteredImage;
     }

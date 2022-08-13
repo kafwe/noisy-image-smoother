@@ -110,7 +110,9 @@ public class MeanFilterSerial {
             System.out.println("File could not be opened");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
-        }        
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Usage: java MeanFilterSerial <inputImageName> <outputImageName> <windowWidth>");
+        }       
     }
     
 }
