@@ -1,0 +1,24 @@
+galactic2, window width=3
+2546
+2498
+2226
+2372
+2392
+galactic2, window width=5
+6802
+6485
+6547
+6805
+6571
+galactic2, window width=11
+37386
+37009
+37493
+36870
+37414
+galactic2, window width=15
+71023
+70819
+72413
+73853
+71568

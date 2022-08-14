@@ -18,24 +18,22 @@ public class MedianFilterParallel extends RecursiveAction {
     private int start;
     private int length;
     private  BufferedImage destination;
-    private int windowWidth;
-    private static int SEQUENTIAL_CUTOFF = 100; // cutoff for sequential processing
+    private static int WINDOW_WIDTH; // the width of the window to use for the filter
+    private static int SEQUENTIAL_CUTOFF = 200; // cutoff for sequential processing
     
     /**
      * Constructs a new MedianFilterParallel object with the specified window width.
      * 
      * @param source the source image to apply the filter to
      * @param start the start index of the region to process
-     * @param length the (width) of the region to process
+     * @param length the length (width) of the region to process
      * @param destination the destination image to write the results to
-     * @param windowWidth the width of the window to use for the filter
      */
-    public MedianFilterParallel(BufferedImage source, int start, int length, BufferedImage destination, int windowWidth) {
+    public MedianFilterParallel(BufferedImage source, int start, int length, BufferedImage destination) {
         this.source = source;
         this.start = start;
         this.length = length;
         this.destination = destination;
-        this.windowWidth = windowWidth;
     }
 
     /**
@@ -56,25 +54,14 @@ public class MedianFilterParallel extends RecursiveAction {
     }
 
     /**
-     * Computes the median of the neighbouring pixels in the specified window.
-     * 
-     * @param values the values of the neighbouring pixels
-     * @return the int representing the median of the neighbouring pixels
-     */
-    private int computeMedian(int[] values) {
-        Arrays.sort(values);
-        return values[values.length / 2];
-    }
-
-    /**
      * Directly applies the median filter to a region of the source image.
      * Writes the results to the destination image.
      */
     protected void applyFilter() {
         int width = source.getWidth();
         int height = source.getHeight();
-        int neighbouringPixels = (windowWidth - 1) / 2;
-        int windowSize = windowWidth * windowWidth;
+        int neighbouringPixels = (WINDOW_WIDTH - 1) / 2;
+        int windowSize = WINDOW_WIDTH * WINDOW_WIDTH;
         int[] redValues = new int[windowSize];
         int[] greenValues = new int[windowSize];
         int[] blueValues = new int[windowSize];
@@ -99,9 +86,14 @@ public class MedianFilterParallel extends RecursiveAction {
                     }
                 }
 
-                int red = computeMedian(redValues);
-                int green = computeMedian(greenValues);
-                int blue = computeMedian(blueValues);
+                // determine the median value of the window
+                Arrays.sort(redValues);
+                Arrays.sort(greenValues);
+                Arrays.sort(blueValues);
+                int red = redValues[windowSize / 2];
+                int green = greenValues[windowSize / 2];
+                int blue = blueValues[windowSize / 2];
+
                 // replace the pixel with the median of the neighbouring pixels
                 int filteredPixel = red << 16 | green << 8 | blue;
                 destination.setRGB(x, y, filteredPixel);
@@ -128,8 +120,9 @@ public class MedianFilterParallel extends RecursiveAction {
         // the midpoint of the region of the image calling the method
         int mid = length / 2;
         // split the region into two smaller regions
-        MedianFilterParallel left = new MedianFilterParallel(source, start, mid, destination, windowWidth);
-        MedianFilterParallel right = new MedianFilterParallel(source, start + mid, length - mid, destination, windowWidth);
+        MedianFilterParallel left = new MedianFilterParallel(source, start, mid, destination);
+        MedianFilterParallel right = new MedianFilterParallel(source, start + mid, 
+        length - mid, destination);
         left.fork();
         right.compute();
         // wait for the left task to finish
@@ -146,10 +139,10 @@ public class MedianFilterParallel extends RecursiveAction {
         try {
             File inputFile = new File(args[0]);
             File outputFile = new File(args[1]);
-            int windowWidth = Integer.parseInt(args[2]);
-            isValidWindowWidth(windowWidth);
+            WINDOW_WIDTH = Integer.parseInt(args[2]);
+            isValidWindowWidth(WINDOW_WIDTH);
             BufferedImage inputImage = ImageIO.read(inputFile);
-            BufferedImage filteredImage = smooth(inputImage, windowWidth);
+            BufferedImage filteredImage = smooth(inputImage);
             ImageIO.write(filteredImage, "jpeg", outputFile);
 
         } catch (FileNotFoundException e) {
@@ -168,14 +161,12 @@ public class MedianFilterParallel extends RecursiveAction {
      * Smooths the specified image using a median filter with the specified window width.
      * 
      * @param image the image to smooth
-     * @param windowWidth the width of the window to use for the filter
      * @return the smoothed image
      */
-    public static BufferedImage smooth(BufferedImage image, int windowWidth) {
+    public static BufferedImage smooth(BufferedImage image) {
         int width = image.getWidth();
         BufferedImage filteredImage = new BufferedImage(width, image.getHeight(), image.getType());
-        MedianFilterParallel task = new MedianFilterParallel(image, 0, width, 
-        filteredImage, windowWidth);
+        MedianFilterParallel task = new MedianFilterParallel(image, 0, width, filteredImage);
         ForkJoinPool pool = new ForkJoinPool();
 
         // time the execution of the task
@@ -187,5 +178,5 @@ public class MedianFilterParallel extends RecursiveAction {
 
         return filteredImage;
     }
-    
+
 }

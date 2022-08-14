@@ -1,12 +1,15 @@
+"""Script to determine the optimal sequential cutoff for a given 
+image size and filter"""
+
 import os
 import sys
 
 
-WINDOW_WIDTH = 15
+WINDOW_WIDTH = 9
 FILTER = sys.argv[1]
 RESULTS_DIR = f"results/sequential_cutoff/{FILTER}"
 
-for x in range(2, 5):
+for x in range(1, 5):
     file_name = f"galactic{x}"
     input_image = f"images/input/{file_name}.jpg"
     output_image = f"images/sequential_cutoff/{file_name}-{FILTER}.jpg"
@@ -21,4 +24,4 @@ for x in range(2, 5):
             os.system(f"java -cp bin {FILTER} {input_image} {output_image} \
              {WINDOW_WIDTH} {sequential_cutoff} >> {RESULTS_DIR}/{file_name}.txt")
     
-    print("-"*50)
+    print("-"*60)

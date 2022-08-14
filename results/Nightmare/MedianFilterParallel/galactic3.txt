@@ -1,0 +1,24 @@
+galactic3, window width=3
+371
+399
+352
+352
+402
+galactic3, window width=5
+844
+773
+834
+814
+858
+galactic3, window width=11
+4061
+4109
+3755
+3619
+3932
+galactic3, window width=15
+7258
+6754
+7095
+7286
+7504

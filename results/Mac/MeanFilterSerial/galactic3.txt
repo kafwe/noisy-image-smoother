@@ -1,0 +1,24 @@
+galactic2, window width=3
+386
+412
+372
+374
+380
+galactic2, window width=5
+777
+770
+796
+807
+775
+galactic2, window width=11
+2941
+2933
+2888
+3183
+2927
+galactic2, window width=15
+5233
+5850
+5895
+5653
+4963
