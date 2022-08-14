@@ -70,7 +70,7 @@ public class MedianFilterParallel extends RecursiveAction {
      * Directly applies the median filter to a region of the source image.
      * Writes the results to the destination image.
      */
-    protected void computeDirectly() {
+    protected void applyFilter() {
         int width = source.getWidth();
         int height = source.getHeight();
         int neighbouringPixels = (windowWidth - 1) / 2;
@@ -121,7 +121,7 @@ public class MedianFilterParallel extends RecursiveAction {
     @Override
     protected void compute() {
         if (length <= SEQUENTIAL_CUTOFF) {
-            computeDirectly();
+            applyFilter();
             return;
         }
 
@@ -129,7 +129,7 @@ public class MedianFilterParallel extends RecursiveAction {
         int mid = length / 2;
         // split the region into two smaller regions
         MedianFilterParallel left = new MedianFilterParallel(source, start, mid, destination, windowWidth);
-        MedianFilterParallel right = new MedianFilterParallel(source, start + mid, length - mid, destination, windowWidth);
+        MedianFilterParallel right = new MedianFilterParallel(source, start + mid, mid, destination, windowWidth);
         left.fork();
         right.compute();
         // wait for the left task to finish

@@ -58,7 +58,7 @@ public class MeanFilterParallel extends RecursiveAction {
      * Directly applies the mean filter to a region of the source image.
      * Writes the results to the destination image.
      */
-    protected void computeDirectly() {
+    protected void applyFilter() {
         int width = source.getWidth();
         int height = source.getHeight();
         int neighbouringPixels = (windowWidth - 1) / 2; 
@@ -108,7 +108,7 @@ public class MeanFilterParallel extends RecursiveAction {
     @Override
     protected void compute() {
         if (length <= SEQUENTIAL_CUTOFF) {
-            computeDirectly();
+            applyFilter();
             return;
         }
 
@@ -116,7 +116,7 @@ public class MeanFilterParallel extends RecursiveAction {
         int mid = length / 2;
         // split the region into two smaller regions
         MeanFilterParallel left = new MeanFilterParallel(source, start, mid, destination, windowWidth);
-        MeanFilterParallel right = new MeanFilterParallel(source, start + mid, length - mid, destination, windowWidth);
+        MeanFilterParallel right = new MeanFilterParallel(source, start + mid, mid, destination, windowWidth);
         left.fork();
         right.compute();
         // wait for the left task to finish
