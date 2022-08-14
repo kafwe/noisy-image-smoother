@@ -1,17 +1,17 @@
 import os
+import sys
 
 
 WINDOW_WIDTH = 15
-FILTER = "MedianFilterParallel"
+FILTER = sys.argv[1]
 RESULTS_DIR = f"results/sequential_cutoff/{FILTER}"
 
-for x in range(1, 5):
+for x in range(2, 5):
     file_name = f"galactic{x}"
     input_image = f"images/input/{file_name}.jpg"
     output_image = f"images/sequential_cutoff/{file_name}-{FILTER}.jpg"
 
-    for i in range(1, 11):
-        sequential_cutoff = 2 ** i
+    for sequential_cutoff in range(200, 1200, 200):
         print(f"Testing {file_name}.jpg with cutoff {sequential_cutoff}")
 
         with open(f"{RESULTS_DIR}/{file_name}.txt", "a") as file:

@@ -8,7 +8,7 @@ with Image.open(f"images/input/{file_name}.jpg") as image:
     width = image.size[0]
     height = image.size[1]
 
-    for i in range(4, 1, -1):
+    for i in range(4, 0, -1):
         width = width // 2
         height = height // 2
         resized_image = image.resize((width, height))

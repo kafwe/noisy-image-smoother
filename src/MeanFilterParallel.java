@@ -116,7 +116,7 @@ public class MeanFilterParallel extends RecursiveAction {
         int mid = length / 2;
         // split the region into two smaller regions
         MeanFilterParallel left = new MeanFilterParallel(source, start, mid, destination, windowWidth);
-        MeanFilterParallel right = new MeanFilterParallel(source, start + mid, mid, destination, windowWidth);
+        MeanFilterParallel right = new MeanFilterParallel(source, start + mid, length - mid, destination, windowWidth);
         left.fork();
         right.compute();
         // wait for the left task to finish

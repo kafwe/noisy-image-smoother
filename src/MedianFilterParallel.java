@@ -26,7 +26,7 @@ public class MedianFilterParallel extends RecursiveAction {
      * 
      * @param source the source image to apply the filter to
      * @param start the start index of the region to process
-     * @param length the length of the region to process
+     * @param length the (width) of the region to process
      * @param destination the destination image to write the results to
      * @param windowWidth the width of the window to use for the filter
      */
@@ -129,7 +129,7 @@ public class MedianFilterParallel extends RecursiveAction {
         int mid = length / 2;
         // split the region into two smaller regions
         MedianFilterParallel left = new MedianFilterParallel(source, start, mid, destination, windowWidth);
-        MedianFilterParallel right = new MedianFilterParallel(source, start + mid, mid, destination, windowWidth);
+        MedianFilterParallel right = new MedianFilterParallel(source, start + mid, length - mid, destination, windowWidth);
         left.fork();
         right.compute();
         // wait for the left task to finish
