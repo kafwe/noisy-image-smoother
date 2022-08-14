@@ -1,0 +1,24 @@
+galactic4, window width=3
+7091
+6909
+7142
+7266
+7135
+galactic4, window width=5
+22040
+22196
+22135
+22736
+27320
+galactic4, window width=11
+157788
+151356
+143377
+135133
+136419
+galactic4, window width=15
+253899
+246834
+282366
+261707
+247907

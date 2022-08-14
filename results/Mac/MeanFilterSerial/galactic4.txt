@@ -1,0 +1,24 @@
+galactic1, window width=3
+104
+320
+153
+124
+104
+galactic1, window width=5
+244
+235
+234
+227
+237
+galactic1, window width=11
+756
+817
+771
+773
+792
+galactic1, window width=15
+1317
+1290
+1304
+1318
+1358

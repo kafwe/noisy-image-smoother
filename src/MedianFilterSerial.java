@@ -50,18 +50,6 @@ public class MedianFilterSerial {
         this.windowWidth = windowWidth;
     }
 
-
-    /**
-     * Computes the median of the neighbouring pixels in the specified window.
-     * 
-     * @param values the values of the neighbouring pixels
-     * @return the int representing the median of the neighbouring pixels
-     */
-    private int computeMedian(int[] values) {
-        Arrays.sort(values);
-        return values[values.length / 2];
-    }
-
     /**
      * Applies the median filter to the specified image.
      * 
@@ -94,9 +82,14 @@ public class MedianFilterSerial {
                     }
                 }
 
-                int red = computeMedian(redValues);
-                int green = computeMedian(greenValues);
-                int blue = computeMedian(blueValues);
+                // determine the median value of the window
+                Arrays.sort(redValues);
+                Arrays.sort(greenValues);
+                Arrays.sort(blueValues);
+                int red = redValues[windowSize / 2];
+                int green = greenValues[windowSize / 2];
+                int blue = blueValues[windowSize / 2];
+                
                 // replace the pixel with the median of the neighbouring pixels
                 int filteredPixel = red << 16 | green << 8 | blue;
                 filteredImage.setRGB(x, y, filteredPixel);

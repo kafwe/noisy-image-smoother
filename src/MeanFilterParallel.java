@@ -17,24 +17,23 @@ public class MeanFilterParallel extends RecursiveAction {
     private int start;
     private int length;
     private  BufferedImage destination;
-    private int windowWidth;
-    private static int SEQUENTIAL_CUTOFF = 100; // cutoff for sequential processing
+    private static int WINDOW_WIDTH; // the width of the window to use for the filter
+    private static int SEQUENTIAL_CUTOFF = 200; // cutoff for sequential processing
     
     /**
      * Constructs a new MeanFilterParallel object with the specified window width.
      * 
      * @param source the source image to apply the filter to
      * @param start the start index of the region to process
-     * @param length the length of the region to process
+     * @param length the length (width) of the region to process
      * @param destination the destination image to write the results to
      * @param windowWidth the width of the window to use for the filter
      */
-    public MeanFilterParallel(BufferedImage source, int start, int length, BufferedImage destination, int windowWidth) {
+    public MeanFilterParallel(BufferedImage source, int start, int length, BufferedImage destination) {
         this.source = source;
         this.start = start;
         this.length = length;
         this.destination = destination;
-        this.windowWidth = windowWidth;
     }
 
     /**
@@ -61,7 +60,7 @@ public class MeanFilterParallel extends RecursiveAction {
     protected void applyFilter() {
         int width = source.getWidth();
         int height = source.getHeight();
-        int neighbouringPixels = (windowWidth - 1) / 2; 
+        int neighbouringPixels = (WINDOW_WIDTH - 1) / 2; 
 
         // keep in bounds of image
         start = Math.max(start, neighbouringPixels);
@@ -85,7 +84,7 @@ public class MeanFilterParallel extends RecursiveAction {
                 }
 
                 // compute the mean of the neighbouring pixels
-                int windowSize = windowWidth * windowWidth;
+                int windowSize = WINDOW_WIDTH * WINDOW_WIDTH;
                 red /= windowSize;
                 green /= windowSize;
                 blue /= windowSize;
@@ -115,8 +114,9 @@ public class MeanFilterParallel extends RecursiveAction {
         // the midpoint of the region of the image calling the method
         int mid = length / 2;
         // split the region into two smaller regions
-        MeanFilterParallel left = new MeanFilterParallel(source, start, mid, destination, windowWidth);
-        MeanFilterParallel right = new MeanFilterParallel(source, start + mid, length - mid, destination, windowWidth);
+        MeanFilterParallel left = new MeanFilterParallel(source, start, mid, destination);
+        MeanFilterParallel right = new MeanFilterParallel(source, start + mid, 
+        length - mid, destination);
         left.fork();
         right.compute();
         // wait for the left task to finish
@@ -133,10 +133,10 @@ public class MeanFilterParallel extends RecursiveAction {
         try {
             File inputFile = new File(args[0]);
             File outputFile = new File(args[1]);
-            int windowWidth = Integer.parseInt(args[2]);
-            isValidWindowWidth(windowWidth);
+            WINDOW_WIDTH = Integer.parseInt(args[2]);
+            isValidWindowWidth(WINDOW_WIDTH);
             BufferedImage inputImage = ImageIO.read(inputFile);
-            BufferedImage filteredImage = smooth(inputImage, windowWidth);
+            BufferedImage filteredImage = smooth(inputImage);
             ImageIO.write(filteredImage, "jpeg", outputFile);
 
         } catch (FileNotFoundException e) {
@@ -155,14 +155,13 @@ public class MeanFilterParallel extends RecursiveAction {
      * Smooths the specified image using a mean filter with the specified window width.
      * 
      * @param image the image to smooth
-     * @param windowWidth the width of the window to use for the filter
      * @return the smoothed image
      */
-    public static BufferedImage smooth(BufferedImage image, int windowWidth) {
+    public static BufferedImage smooth(BufferedImage image) {
         int width = image.getWidth();
         BufferedImage filteredImage = new BufferedImage(width, image.getHeight(), image.getType());
         MeanFilterParallel task = new MeanFilterParallel(image, 0, width, 
-        filteredImage, windowWidth);
+        filteredImage);
         ForkJoinPool pool = new ForkJoinPool();
 
         // time the execution of the task

@@ -1,0 +1,24 @@
+galactic5, window width=3
+73
+48
+50
+46
+48
+galactic5, window width=5
+88
+72
+71
+71
+111
+galactic5, window width=11
+219
+225
+221
+232
+223
+galactic5, window width=15
+390
+405
+391
+407
+403

@@ -3,3 +3,7 @@
 /images
 /lib
 /scripts/venv
+.DS_Store
+/tests/.DS_Store
+/src/.DS_Store
+/results/.DS_Store
